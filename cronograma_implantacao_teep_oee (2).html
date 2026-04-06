@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma TeepOEE</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<div class="p-6">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center mb-6">
+    <img src="https://teep.com.br/wp-content/uploads/2023/11/cropped-cropped-teep-logo-menor-113x33.png" class="h-10">
+    <h1 class="text-2xl font-bold text-gray-800">Implantação TeepOEE</h1>
+    <img src="https://industriascolombo.com.br/assets/core/publica/imagens/logo.png" class="h-10">
+  </div>
+
+  <!-- MAPA / LAYOUT (AGORA PRIMEIRO) -->
+  <div class="bg-white p-4 rounded-2xl shadow mb-6">
+    <h2 class="text-lg font-semibold mb-3 text-gray-700">Mapa de Implantação (Postos de Trabalho)</h2>
+    <p class="text-sm text-gray-600 mb-4">
+      Visão geral dos postos de trabalho por unidade, base para definição do escopo de implantação.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <div class="border rounded-xl p-3">
+        <h3 class="font-semibold text-gray-800 mb-2">FUCOL</h3>
+        <p>Postos a monitorar: <b>6</b></p>
+        <p class="text-gray-500">Macheira, Granalha, Esmeril, Moldadora, Forno</p>
+      </div>
+
+      <div class="border rounded-xl p-3">
+        <h3 class="font-semibold text-gray-800 mb-2">AEMCO</h3>
+        <p>Postos a monitorar: <b>33</b></p>
+        <p class="text-gray-500">Centros de usinagem, tornos e processos auxiliares</p>
+      </div>
+
+      <div class="border rounded-xl p-3">
+        <h3 class="font-semibold text-gray-800 mb-2">COTRAME</h3>
+        <p>Postos a monitorar: <b>47</b></p>
+        <p class="text-gray-500">Tornos CNC e processos térmicos</p>
+      </div>
+
+      <div class="border rounded-xl p-3">
+        <h3 class="font-semibold text-gray-800 mb-2">MIAC</h3>
+        <p>Postos a monitorar: <b>46</b></p>
+        <p class="text-gray-500">Dobradeiras, Laser, Calandra e montagem</p>
+      </div>
+    </div>
+
+    <div class="mt-4 p-3 bg-gray-100 rounded-xl text-xs text-gray-600">
+      ⚠️ Dependência de infraestrutura (rede e elétrica) conforme padrão Teep.
+    </div>
+  </div>
+
+  <!-- PLANO / CRONOGRAMA -->
+  <div class="bg-white p-4 rounded-2xl shadow mb-6">
+    <h2 class="text-lg font-semibold mb-3 text-gray-700">Plano de Implantação e Cronograma</h2>
+
+    <table class="w-full text-sm border">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="p-2 border">Ordem</th>
+          <th class="p-2 border">Unidade</th>
+          <th class="p-2 border">Máquinas</th>
+          <th class="p-2 border">Horas</th>
+          <th class="p-2 border">Acumulado</th>
+        </tr>
+      </thead>
+      <tbody id="tabela"></tbody>
+      <tfoot class="bg-gray-100 font-bold">
+        <tr>
+          <td colspan="2" class="p-2 border">TOTAL</td>
+          <td class="p-2 border" id="totalMaquinas"></td>
+          <td class="p-2 border" id="totalHoras"></td>
+          <td class="p-2 border">-</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- TIMELINE DETALHADA -->
+  <div class="bg-white p-4 rounded-2xl shadow mb-6">
+    <h2 class="text-lg font-semibold mb-3 text-gray-700">Linha do Tempo</h2>
+    <div id="timeline" class="space-y-4"></div>
+  </div>
+
+  <!-- TIMELINE CONSOLIDADA -->
+  <div class="bg-white p-4 rounded-2xl shadow">
+    <h2 class="text-lg font-semibold mb-3 text-gray-700">Linha do Tempo Consolidada</h2>
+    <div class="w-full bg-gray-200 rounded-full h-6 flex overflow-hidden" id="timelineTotal"></div>
+    <div class="mt-3 text-sm text-gray-600" id="legenda"></div>
+  </div>
+
+</div>
+
+<script>
+const dados = [
+  {ordem:1, unidade:"MIAC Fase 1", maquinas:13, cor:"#f59e0b"},
+  {ordem:2, unidade:"AEMCO", maquinas:40, cor:"#1f2937"},
+  {ordem:3, unidade:"COTRAME", maquinas:62, cor:"#374151"},
+  {ordem:4, unidade:"FUCOL", maquinas:12, cor:"#9ca3af"},
+  {ordem:5, unidade:"MIAC Fase 2", maquinas:75, cor:"#fbbf24"},
+];
+
+const tabelaTeep = [
+  {min:1,max:5,horas:32},{min:6,max:10,horas:40},{min:11,max:15,horas:48},{min:16,max:20,horas:56},
+  {min:21,max:25,horas:64},{min:26,max:30,horas:72},{min:31,max:35,horas:88},{min:36,max:40,horas:96},
+  {min:41,max:45,horas:104},{min:46,max:50,horas:112},{min:51,max:55,horas:120},{min:56,max:60,horas:128},
+  {min:61,max:65,horas:144},{min:66,max:70,horas:152},{min:71,max:75,horas:160},{min:76,max:80,horas:168},
+  {min:81,max:85,horas:176},{min:86,max:90,horas:184},{min:91,max:95,horas:192},{min:96,max:100,horas:200},
+  {min:100,max:105,horas:232},{min:106,max:110,horas:240},{min:111,max:115,horas:248},{min:116,max:120,horas:256},
+  {min:121,max:125,horas:264},{min:126,max:130,horas:272},{min:131,max:135,horas:288},{min:136,max:140,horas:296},
+  {min:141,max:145,horas:304},{min:146,max:150,horas:312},{min:151,max:155,horas:320},{min:156,max:160,horas:328},
+  {min:161,max:165,horas:344},{min:166,max:170,horas:352},{min:171,max:175,horas:360},{min:176,max:180,horas:368},
+  {min:181,max:185,horas:376},{min:186,max:190,horas:384},{min:191,max:195,horas:392},{min:196,max:200,horas:400}
+];
+
+function getHoras(qtd){
+  const f = tabelaTeep.find(x=>qtd>=x.min && qtd<=x.max);
+  return f ? f.horas : 0;
+}
+
+function render(){
+  let acumulado = 0;
+  let totalMaquinas = 0;
+  let totalHoras = 0;
+
+  const tabela = document.getElementById("tabela");
+  const timeline = document.getElementById("timeline");
+  const timelineTotal = document.getElementById("timelineTotal");
+  const legenda = document.getElementById("legenda");
+
+  tabela.innerHTML = "";
+  timeline.innerHTML = "";
+  timelineTotal.innerHTML = "";
+  legenda.innerHTML = "";
+
+  const horasPorEtapa = dados.map(d=>getHoras(d.maquinas));
+  totalHoras = horasPorEtapa.reduce((a,b)=>a+b,0);
+  totalMaquinas = dados.reduce((a,b)=>a+b.maquinas,0);
+
+  dados.forEach((d,i)=>{
+    const horas = horasPorEtapa[i];
+    acumulado += horas;
+
+    tabela.innerHTML += `
+      <tr>
+        <td class="p-2 border">${d.ordem}</td>
+        <td class="p-2 border">${d.unidade}</td>
+        <td class="p-2 border">${d.maquinas}</td>
+        <td class="p-2 border">${horas}h</td>
+        <td class="p-2 border font-bold">${acumulado}h</td>
+      </tr>
+    `;
+
+    const perc = totalHoras ? (horas/totalHoras)*100 : 0;
+
+    timeline.innerHTML += `
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span>${d.unidade}</span>
+          <span>${horas}h</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-5">
+          <div style="width:${perc}%; background:${d.cor}" class="h-5 rounded-full text-xs text-white flex items-center justify-center">
+            ${Math.round(perc)}%
+          </div>
+        </div>
+      </div>
+    `;
+
+    timelineTotal.innerHTML += `<div style="width:${perc}%; background:${d.cor}" class="h-full flex items-center justify-center text-[10px] text-white font-semibold">${Math.round(perc)}%</div>`;
+
+    legenda.innerHTML += `<div><span style="display:inline-block;width:12px;height:12px;background:${d.cor};margin-right:5px"></span>${d.unidade} (${horas}h)</div>`;
+  });
+
+  document.getElementById("totalMaquinas").innerText = totalMaquinas;
+  document.getElementById("totalHoras").innerText = totalHoras + "h";
+}
+
+render();
+</script>
+
+</body>
+</html>
